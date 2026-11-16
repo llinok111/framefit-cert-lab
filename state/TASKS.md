@@ -14,8 +14,8 @@
   - 二分 oracle（透视矩阵 + 100 次迭代）与闭式解最大相对差 **4.35e-16**；尺度 1e-6…1e6 漂移 7.11e-15。
   - 计时：精确解中位 **4.248 ms/288 视角**（14.75 µs/视角，cold 28.500 ms，relSD 5.26%）；
     bbox 球 2.269 ms；二分 oracle 205.565 ms → **48.4×**。
-  - `bench/verify.mjs` **13 passed / 0 failed**。
-- 发布自证：干净克隆 `/tmp/smoke` 跑 README 第一条命令 → gen-sample + gen-ref + verify 13/13，
+  - `bench/verify.mjs` **15 passed / 0 failed**。
+- 发布自证：干净克隆 `/tmp/smoke` 跑 README 第一条命令 → gen-sample + gen-ref + verify 15/15，
   data sha256 与本地逐字节相同（`0c4ac203…`、`3b0f55da…`），克隆内 bench 49.7×（README 记 48.4×，
   已声明计时 ±10% 漂移、逻辑输出逐位确定）。
 - 浏览器：静态服务 HEAD 200、importmap 命中 1、`main.js`/`core.mjs`/`meshes.json`/`reference.json` 全 200；

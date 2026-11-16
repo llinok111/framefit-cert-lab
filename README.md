@@ -38,7 +38,7 @@ z  = pf + D
 node tools/gen-sample.mjs && node tools/gen-ref.mjs && node bench/verify.mjs
 ```
 
-期望最后一行：`14 passed / 0 failed`。没有依赖、没有 `npm install`。
+期望最后一行：`15 passed / 0 failed`。没有依赖、没有 `npm install`。
 
 ```bash
 node bench/bench.mjs       # 写 bench/result.json（1 warmup + 9 reps + 冷启动）
@@ -60,6 +60,7 @@ python3 -m http.server 4173   # 打开 http://localhost:4173/ ，拖拽转动，
 | `D*·(1−1e-6)` 处越界 | **288/288 视角至少 1 个**，共 2,203 个顶点 |
 | 二分 oracle 与闭式解最大相对差 | **4.35e-16**（288 例，100 次迭代） |
 | 尺度 1e-6…1e6 距离漂移 | **7.11e-15**（判定与越界数不变） |
+| 对抗随机输入（A15） | 200 组随机点集 × 随机镜头 × 尺度 1e-6…1e6：越界 **0 / 6,055**，margin-binding 全紧（最差 8.88e-16），探针 **200/200** 证伪 |
 | 精确解耗时（288 视角） | 中位 **4.248 ms**（14.75 µs/视角，cold 28.500 ms，p95 4.615，relSD 5.26%） |
 | bbox 球基线耗时 | 中位 **2.269 ms** |
 | 100 步二分 oracle 耗时 | 中位 **205.565 ms** → 精确解 **48.4×** |
@@ -90,7 +91,7 @@ tools/gen-sample.mjs 6 个网格，确定性（无随机、无时钟）
 tools/gen-ref.mjs    烘焙 288 例到 data/reference.json（浏览器对账用）
 tools/scene.mjs      案例表（6 × 24 × 2）
 baseline/naive.mjs   bbox 球基线，可独立运行
-bench/verify.mjs     14 条断言
+bench/verify.mjs     15 条断言
 bench/bench.mjs      1 warmup + 9 reps + 冷启动 → bench/result.json
 bench/result.json    真实测量
 ```

@@ -162,6 +162,32 @@ const rel = (a, b) => Math.abs(a - b) / Math.max(1e-300, Math.abs(b));
     `checked=${rec.checked} mismatches=${rec.mismatches} maxRelDist=${rec.maxRelDist.toExponential(2)}`);
 }
 
+// A15 adversarial random inputs (deterministic LCG): 200 meshes x random view
+{
+  let seed = 123456789;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let outside = 0, tight = 0, marginBound = 0, falsified = 0, worst = 0, verts = 0;
+  for (let t = 0; t < 200; t++) {
+    const n = 3 + Math.floor(rnd() * 60);
+    const scale = Math.pow(10, rnd() * 12 - 6); // 1e-6 .. 1e6
+    const v = [];
+    for (let i = 0; i < n; i++) v.push([(rnd() - 0.5) * 10 * scale, (rnd() - 0.5) * 10 * scale, (rnd() - 0.5) * 10 * scale]);
+    const opts = {
+      yaw: rnd() * Math.PI * 2, pitch: (rnd() - 0.5) * Math.PI * 0.98,
+      fovY: (20 + rnd() * 70) * Math.PI / 180, aspect: 0.5 + rnd() * 2,
+      margin: 0.5 + rnd() * 0.5, nearFrac: 0.001 + rnd() * 0.02,
+    };
+    const f = fitExact(v, opts);
+    const m = measureFrame(v, f, f.distance);
+    verts += n; outside += m.outside;
+    if (f.bound === 'margin') { marginBound++; if (Math.abs(m.maxNdc - 1) <= 1e-9) tight++; worst = Math.max(worst, Math.abs(m.maxNdc - 1)); }
+    if (probeTighter(v, f, f.distance, 1 - 1e-6) >= 1) falsified++;
+  }
+  ok('A15 200 random scaled point sets: 0 outside, tight when margin-bound, probe always falsifies',
+    outside === 0 && tight === marginBound && falsified === 200,
+    `vertices=${verts} outside=${outside} tight=${tight}/${marginBound} falsified=${falsified}/200 worst=${worst.toExponential(2)}`);
+}
+
 console.log(`framefit-cert-lab verify — node ${process.version}`);
 console.log(results.join('\n'));
 console.log(`\n${pass} passed / ${fail} failed`);
