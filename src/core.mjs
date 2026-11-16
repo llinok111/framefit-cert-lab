@@ -184,3 +184,26 @@ export function summarize(cases) {
     totalVertices: cases.reduce((s, c) => s + c.vertices, 0),
   };
 }
+
+// Recompute every baked case and compare with the reference file. This is the
+// same reconciliation the browser runs, kept in core so node can verify it too.
+export function reconcileReference(meshes, ref) {
+  let checked = 0, mismatches = 0, maxRelDist = 0, worst = null;
+  const byName = new Map(meshes.map((m) => [m.name, m]));
+  for (const row of ref.cases) {
+    const def = byName.get(row.mesh);
+    if (!def) { mismatches++; continue; }
+    const opts = {
+      yaw: row.yaw, pitch: ref.params.pitch, fovY: ref.params.fovY,
+      aspect: row.aspect, margin: ref.params.margin, nearFrac: ref.params.nearFrac,
+    };
+    const f = fitExact(def.vertices, opts);
+    const m = measureFrame(def.vertices, f, f.distance);
+    const relDist = Math.abs(f.distance - row.exact) / Math.max(1, Math.abs(row.exact));
+    maxRelDist = Math.max(maxRelDist, relDist);
+    checked++;
+    const same = relDist <= 1e-9 && Math.abs(m.maxNdc - row.maxNdc) <= 1e-12 && m.outside === row.outside;
+    if (!same) { mismatches++; worst = row.mesh; }
+  }
+  return { checked, mismatches, maxRelDist, worst };
+}

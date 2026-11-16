@@ -38,7 +38,7 @@ z  = pf + D
 node tools/gen-sample.mjs && node tools/gen-ref.mjs && node bench/verify.mjs
 ```
 
-期望最后一行：`13 passed / 0 failed`。没有依赖、没有 `npm install`。
+期望最后一行：`14 passed / 0 failed`。没有依赖、没有 `npm install`。
 
 ```bash
 node bench/bench.mjs       # 写 bench/result.json（1 warmup + 9 reps + 冷启动）
@@ -90,7 +90,7 @@ tools/gen-sample.mjs 6 个网格，确定性（无随机、无时钟）
 tools/gen-ref.mjs    烘焙 288 例到 data/reference.json（浏览器对账用）
 tools/scene.mjs      案例表（6 × 24 × 2）
 baseline/naive.mjs   bbox 球基线，可独立运行
-bench/verify.mjs     13 条断言
+bench/verify.mjs     14 条断言
 bench/bench.mjs      1 warmup + 9 reps + 冷启动 → bench/result.json
 bench/result.json    真实测量
 ```
@@ -105,7 +105,7 @@ bench/result.json    真实测量
 3. **定理级的顶点充分性**：只检查顶点即可保证整个三角形在框内（凸性证明，非采样）；
 4. **尺度不变**：近平面按场景半径取比例，1e-6…1e6 结论按比例不变（漂移 7e-15）；
 5. **所见即所验**：页面上拖拽/滚轮改参数时，显示的距离、见证、越界数与 node 复算同一 core，
-   并与烘焙的 288 例逐例对账。
+   并与烘焙的 288 例逐例对账；对账函数本身也在 core 里、由 node 断言（A14：288/288、0 mismatch）。
 
 这三条合起来在"取景"这个每天被调用几百万次、却几乎没有可验证实现的角落里是新的：
 数据来自真实运行，浏览器和 node 共用同一份 core，任何数字都能用 `node bench/verify.mjs` 现场推翻。

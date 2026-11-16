@@ -1,7 +1,7 @@
 // Rendering + interaction only. All numbers come from src/core.mjs (no math here).
 import * as THREE from 'three';
 import {
-  fitExact, fitBBoxSphere, measureFrame, probeTighter, bounds, cameraPosition,
+  fitExact, fitBBoxSphere, measureFrame, probeTighter, bounds, cameraPosition, reconcileReference,
 } from './src/core.mjs';
 
 const meshesResp = await fetch('./data/meshes.json');
@@ -123,22 +123,10 @@ for (const m of meshes) {
   el('mesh').appendChild(o);
 }
 
-// ---- node reconciliation: recompute every baked case with the same core and
-// compare against data/reference.json (written by tools/gen-ref.mjs).
-let checked = 0, mismatch = 0;
-for (let i = 0; i < ref.cases.length; i++) {
-  const row = ref.cases[i];
-  const def = meshes.find((m) => m.name === row.mesh);
-  const o = { yaw: row.yaw, pitch: ref.params.pitch, fovY: ref.params.fovY, aspect: row.aspect, margin: ref.params.margin, nearFrac: ref.params.nearFrac };
-  const f = fitExact(def.vertices, o);
-  const m = measureFrame(def.vertices, f, f.distance);
-  const same = Math.abs(f.distance - row.exact) <= 1e-9 * Math.max(1, Math.abs(row.exact)) &&
-    Math.abs(m.maxNdc - row.maxNdc) <= 1e-12 && m.outside === row.outside;
-  checked++;
-  if (!same) mismatch++;
-}
-window.__checked = checked; window.__mismatch = mismatch;
-console.log(`node reconciliation: ${checked} cases, ${mismatch} mismatches`);
+// ---- node reconciliation: the identical function node asserts in bench/verify.mjs
+const rec = reconcileReference(meshes, ref);
+window.__checked = rec.checked; window.__mismatch = rec.mismatches;
+console.log(`node reconciliation: ${rec.checked} cases, ${rec.mismatches} mismatches`);
 
 buildMesh(meshes[0]);
 update();

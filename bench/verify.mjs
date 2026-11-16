@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import {
   fitExact, fitBBoxSphere, measureFrame, fitByBisection, probeTighter,
-  cameraPosition, bounds, summarize, EPS_NDC,
+  cameraPosition, bounds, summarize, EPS_NDC, reconcileReference,
 } from '../src/core.mjs';
 import { bboxSphereFit } from '../baseline/naive.mjs';
 import { caseList, BASE } from '../tools/scene.mjs';
@@ -153,6 +153,13 @@ const rel = (a, b) => Math.abs(a - b) / Math.max(1e-300, Math.abs(b));
   const targetDist = Math.hypot(C[0] - b.center[0], C[1] - b.center[1], C[2] - b.center[2]);
   ok('A13 camera sits exactly D* from the target', Math.abs(targetDist - f.distance) <= 1e-12,
     `|C-target|=${targetDist.toFixed(12)} D*=${f.distance.toFixed(12)}`);
+}
+
+// A14 the browser's reconciliation path, asserted in node too
+{
+  const rec = reconcileReference(meshes, ref);
+  ok('A14 reconcileReference: browser path reproduces all baked cases', rec.checked === ref.cases.length && rec.mismatches === 0,
+    `checked=${rec.checked} mismatches=${rec.mismatches} maxRelDist=${rec.maxRelDist.toExponential(2)}`);
 }
 
 console.log(`framefit-cert-lab verify — node ${process.version}`);
