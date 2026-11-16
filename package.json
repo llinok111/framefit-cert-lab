@@ -1,0 +1,15 @@
+{
+  "name": "framefit-cert-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Exact minimum camera fit distance with a tight witness, vs bbox-sphere framing",
+  "license": "MIT",
+  "scripts": {
+    "gen": "node tools/gen-sample.mjs && node tools/gen-ref.mjs",
+    "test": "node bench/verify.mjs",
+    "bench": "node bench/bench.mjs",
+    "serve": "python3 -m http.server 4173"
+  },
+  "engines": { "node": ">=20" }
+}

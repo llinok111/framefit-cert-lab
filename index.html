@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>framefit-cert-lab — exact camera fit certificate</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: #0b0e14; color: #d7dce5; overflow: hidden; }
+  #app { display: flex; height: 100vh; }
+  #panel { width: 340px; flex: 0 0 340px; padding: 14px 16px; background: #11151d; border-right: 1px solid #222a36; overflow-y: auto; }
+  h1 { font-size: 15px; margin: 0 0 2px; color: #fff; }
+  .sub { color: #7f8b9e; margin-bottom: 12px; font-size: 11px; }
+  label { display: block; margin: 10px 0 3px; color: #9aa7bb; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  input[type=range] { width: 100%; }
+  select, button { width: 100%; background: #1a212c; color: #d7dce5; border: 1px solid #2b3543; border-radius: 5px; padding: 6px; font: inherit; }
+  button { cursor: pointer; margin-top: 6px; }
+  button:hover { border-color: #4a90d9; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .stats { margin-top: 14px; border-top: 1px solid #222a36; padding-top: 10px; }
+  .stats div { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+  .k { color: #8d9aae; }
+  .v { color: #e8eef8; }
+  .good { color: #58d68d; }
+  .warn { color: #f5b041; }
+  #canvasWrap { position: relative; flex: 1; }
+  canvas { display: block; width: 100%; height: 100%; }
+  #hint { position: absolute; left: 12px; bottom: 10px; color: #5f6b7d; font-size: 11px; }
+  #check { margin-top: 12px; border-top: 1px solid #222a36; padding-top: 10px; font-size: 11px; color: #9aa7bb; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="panel">
+    <h1>framefit-cert-lab</h1>
+    <div class="sub">exact minimum camera distance, with a tight witness</div>
+
+    <label for="mesh">mesh</label>
+    <select id="mesh"></select>
+
+    <label for="yaw">yaw <span id="yawVal" class="v"></span></label>
+    <input id="yaw" type="range" min="0" max="360" step="0.5" value="0" />
+
+    <label for="pitch">pitch <span id="pitchVal" class="v"></span></label>
+    <input id="pitch" type="range" min="-80" max="80" step="0.5" value="20" />
+
+    <label for="margin">margin <span id="marginVal" class="v"></span></label>
+    <input id="margin" type="range" min="0.5" max="1" step="0.01" value="0.9" />
+
+    <div class="row">
+      <div>
+        <label for="aspect">aspect</label>
+        <select id="aspect"><option value="1.7777777777777777">16:9</option><option value="1.3333333333333333">4:3</option></select>
+      </div>
+      <div>
+        <label for="fov">fovY</label>
+        <select id="fov"><option value="45">45°</option><option value="60">60°</option><option value="30">30°</option></select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="fitExact">fit: exact (certified)</button>
+      <button id="fitSphere">fit: bbox sphere</button>
+    </div>
+
+    <div class="stats">
+      <div><span class="k">exact distance</span><span class="v" id="sExact">—</span></div>
+      <div><span class="k">bbox-sphere distance</span><span class="v" id="sSphere">—</span></div>
+      <div><span class="k">padding removed</span><span class="v good" id="sSaving">—</span></div>
+      <div><span class="k">binding constraint</span><span class="v" id="sBound">—</span></div>
+      <div><span class="k">tight witness #</span><span class="v" id="sWitness">—</span></div>
+      <div><span class="k">max |NDC| / margin</span><span class="v" id="sNdc">—</span></div>
+      <div><span class="k">vertices outside</span><span class="v" id="sOutside">—</span></div>
+      <div><span class="k">D*(1−1e-6) outside</span><span class="v" id="sProbe">—</span></div>
+    </div>
+
+    <div id="check">node reconciliation: running…</div>
+    <div id="hint"></div>
+  </div>
+  <div id="canvasWrap"><canvas id="c"></canvas></div>
+</div>
+<div id="hint" style="position:fixed;left:356px;bottom:8px;color:#5f6b7d">drag to orbit · wheel to change margin</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
