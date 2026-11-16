@@ -38,7 +38,7 @@ z  = pf + D
 node tools/gen-sample.mjs && node tools/gen-ref.mjs && node bench/verify.mjs
 ```
 
-期望最后一行：`15 passed / 0 failed`。没有依赖、没有 `npm install`。
+期望最后一行：`16 passed / 0 failed`。没有依赖、没有 `npm install`。
 
 ```bash
 python3 bench/oracle.py    # 独立 Python oracle（自带基/投影代码，不 import core）
@@ -48,6 +48,7 @@ python3 bench/oracle.py    # 独立 Python oracle（自带基/投影代码，不
 
 ```bash
 node bench/bench.mjs       # 写 bench/result.json（1 warmup + 9 reps + 冷启动）
+node tools/fit.mjs --mesh torus-2x0.6 --yaw 30 --pitch 20   # 单次查询，输出 JSON（与页面/bench 同一 core）
 python3 -m http.server 4173   # 打开 http://localhost:4173/ ，拖拽转动，滚轮改 margin
 ```
 
@@ -98,8 +99,9 @@ tools/gen-sample.mjs 6 个网格，确定性（无随机、无时钟）
 tools/gen-ref.mjs    烘焙 288 例到 data/reference.json（浏览器对账用）
 tools/scene.mjs      案例表（6 × 24 × 2）
 baseline/naive.mjs   bbox 球基线，可独立运行
-bench/verify.mjs     15 条断言
+bench/verify.mjs     16 条断言
 bench/bench.mjs      1 warmup + 9 reps + 冷启动 → bench/result.json
+tools/fit.mjs        单次查询 CLI（JSON 输出，A16 与 core 对账）
 bench/oracle.py      独立 Python oracle（同一契约的第二实现，验收 8 例）
 bench/result.json    真实测量
 ```

@@ -1,5 +1,6 @@
 // Assertions. `node bench/verify.mjs` — exit 0 only if every check passes.
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import {
   fitExact, fitBBoxSphere, measureFrame, fitByBisection, probeTighter,
   cameraPosition, bounds, summarize, EPS_NDC, reconcileReference,
@@ -186,6 +187,17 @@ const rel = (a, b) => Math.abs(a - b) / Math.max(1e-300, Math.abs(b));
   ok('A15 200 random scaled point sets: 0 outside, tight when margin-bound, probe always falsifies',
     outside === 0 && tight === marginBound && falsified === 200,
     `vertices=${verts} outside=${outside} tight=${tight}/${marginBound} falsified=${falsified}/200 worst=${worst.toExponential(2)}`);
+}
+
+// A16 the CLI path users are told to run
+{
+  const out = execFileSync(process.execPath, ['tools/fit.mjs', '--mesh', 'plate-20x0.4x2', '--yaw', '37', '--pitch', '-12', '--margin', '0.83', '--aspect', '1.5'], { encoding: 'utf8' });
+  const j = JSON.parse(out);
+  const plate = meshes.find((m) => m.name === 'plate-20x0.4x2');
+  const opts = { yaw: (37 * Math.PI) / 180, pitch: (-12 * Math.PI) / 180, fovY: (45 * Math.PI) / 180, aspect: 1.5, margin: 0.83, nearFrac: 0.005 };
+  const f = fitExact(plate.vertices, opts);
+  ok('A16 CLI (tools/fit.mjs) matches core and reports the probe', Math.abs(j.exactDistance - f.distance) <= 1e-12 && j.outsideIfTighter >= 1 && j.outside === 0,
+    `cli=${j.exactDistance} core=${f.distance} saving=${(j.saving * 100).toFixed(3)}% probeOutside=${j.outsideIfTighter}`);
 }
 
 console.log(`framefit-cert-lab verify — node ${process.version}`);
